@@ -1,5 +1,6 @@
 {% set name = "mesaLib" %}
-{% set version = "18.0.0" %}
+{% set version = "20.1.4" %}
+{% set build = 2 %}
 
 package:
   name: {{ name|lower }}
@@ -7,40 +8,75 @@ package:
 
 source:
   fn: {{ name }}-{{ version }}.tar.gz
-  url: ftp://ftp.freedesktop.org/pub/mesa/mesa-{{ version }}.tar.gz
-  sha256: 93c2d3504b2871ac2146603fb1270f341d36a39695e2950a469c5eac74f98457
+  url: ftp://ftp.freedesktop.org/pub/mesa/mesa-{{ version }}.tar.xz
+  sha256: 6800271c2be2a0447510eb4e9b67edd9521859a4d565310617c4b359eb6799fe
   patches:
-    # https://patchwork.freedesktop.org/patch/214086/
-    - 1-1-gallivm-Fix-build-after-llvm-r328839.patch
+    - 0001_syscall_kcmp.patch
 
 build:
   skip: True  # [win]
-  number: 1
-  # Do we still need this???? - hmaarrfk - 18.0.0 -- April 2020
+  number: {{ build }}
+
   track_features:
-      - mesalib
+    - mesalib
 
 requirements:
   build:
-      - {{ compiler('c') }}
-      - {{ compiler('cxx') }}
-      - pkg-config
-      # still too hard to get rid of python2
-      - python 2
-      - mako
-      - zlib
-      - make
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ cdt('xorg-x11-proto-devel') }}
+    - {{ cdt('libxxf86vm-devel') }}
+    - {{ cdt('libxshmfence-devel') }}
+    - meson
+    - mako
+    - flex
+    - bison
+
   host:
-      - pthread-stubs
-      - llvmdev
-      - expat
-      - zlib
+    - expat
+    - zlib
+    - libdrm
+    - llvmdev<=6.0.1
+    - xorg-libx11
+    - xorg-libxext
+    - xorg-xextproto
+    - xorg-glproto
+    - xorg-xf86vidmodeproto
+    - xorg-libxdamage
+
+  run:
+    - xorg-libx11
+    - xorg-libxext
+    - xorg-xextproto
+    - xorg-glproto
+    - xorg-xf86vidmodeproto
+    - xorg-libxdamage
+
   run_constrained:
     - __osx >={{ MACOSX_DEPLOYMENT_TARGET|default("10.9") }}  # [osx]
 
 test:
+  files:
+    - glxinfo.c
+    - glinfo_common.h
+    - glinfo_common.c
+
+  requires:
+    - gcc_linux-64
+    - pkg-config
+
   commands:
-      - test -f $PREFIX/lib/libOSMesa32${SHLIB_EXT}  # [unix]
+    - test -f $PREFIX/lib/libGLESv1_CM.so
+    - test -f $PREFIX/lib/libGLESv2.so
+    - test -f $PREFIX/lib/libOSMesa.so
+    - test -f $PREFIX/lib/libGL.so
+    - test -f $PREFIX/lib/libglapi.so
+    - pkg-config --exists glesv1_cm
+    - pkg-config --exists glesv2
+    - pkg-config --exists osmesa
+    - pkg-config --exists gl
+    - x86_64-conda-linux-gnu-gcc `pkg-config --cflags --libs x11 gl` glxinfo.c glinfo_common.c -o glxinfo
+    - test -f glxinfo
 
 about:
   home: http://www.mesa3d.org
@@ -50,10 +86,9 @@ about:
 
 extra:
     recipe-maintainers:
-      - dnadeau4
-      - doutriaux1
       - sankhesh
       - danlipsa
       - hmaarrfk
       - muryanto1
       - downiec
+      - jasonb5
