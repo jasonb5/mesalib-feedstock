@@ -33,9 +33,10 @@ requirements:
     - bison
 
   host:
+    - pkg-config
     - expat
     - zlib
-    - libdrm
+    - libdrm                       # [linux]
     - llvmdev<=6.0.1
     - xorg-libx11
     - xorg-libxext
@@ -62,21 +63,31 @@ test:
     - glinfo_common.c
 
   requires:
-    - gcc_linux-64
+    - gcc_linux-64  # [linux]
+    - clang_osx-64  # [osx]
     - pkg-config
 
   commands:
-    - test -f $PREFIX/lib/libGLESv1_CM.so
-    - test -f $PREFIX/lib/libGLESv2.so
-    - test -f $PREFIX/lib/libOSMesa.so
-    - test -f $PREFIX/lib/libGL.so
-    - test -f $PREFIX/lib/libglapi.so
+    - test -f $PREFIX/lib/libGLESv1_CM${SHLIB_EXT}     # [linux]
+    - test -f $PREFIX/lib/libGLESv2${SHLIB_EXT}        # [linux]
+    - test -f $PREFIX/lib/libOSMesa${SHLIB_EXT}        # [linux]
+    - test -f $PREFIX/lib/libGL${SHLIB_EXT}            # [linux]
+    - test -f $PREFIX/lib/libglapi${SHLIB_EXT}         # [linux]
+
+    - test -f $PREFIX/lib/libGLESv1_CM.1${SHLIB_EXT}   # [osx]
+    - test -f $PREFIX/lib/libGLESv2.2${SHLIB_EXT}      # [osx]
+    - test -f $PREFIX/lib/libOSMesa.8${SHLIB_EXT}      # [osx]
+    - test -f $PREFIX/lib/libGL.1${SHLIB_EXT}          # [osx]
+    - test -f $PREFIX/lib/libglapi.0${SHLIB_EXT}       # [osx]
+
     - pkg-config --exists glesv1_cm
     - pkg-config --exists glesv2
     - pkg-config --exists osmesa
     - pkg-config --exists gl
-    - x86_64-conda-linux-gnu-gcc `pkg-config --cflags --libs x11 gl` glxinfo.c glinfo_common.c -o glxinfo
+    - ${CC} `pkg-config --cflags --libs x11 gl` glxinfo.c glinfo_common.c -o glxinfo  # [linux]
+    - ${CLANG} `pkg-config --cflags --libs x11 gl` glxinfo.c glinfo_common.c -o glxinfo  # [osx]
     - test -f glxinfo
+    - export
 
 about:
   home: http://www.mesa3d.org
