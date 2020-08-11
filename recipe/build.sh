@@ -7,15 +7,14 @@ meson builddir/ \
   -Dplatforms=x11 \
   -Dosmesa=gallium \
   -Dosmesa-bits=8 \
-  -Dgallium-drivers=swrast \
-  -Ddri-drivers=[] \
-  -Dvulkan-drivers=[] \
   -Dglx=xlib \
-  -Dgbm=false \
-  -Degl=false \
   -Dllvm=true \
-  -Dshared-llvm=false
+  -Dshared-llvm=false \
+  -Dbuild-tests=true
 
 ninja -C builddir/ -j ${CPU_COUNT}
 
 ninja -C builddir/ install
+
+# TODO move to tests section of meta.yaml
+meson test -C builddir/
