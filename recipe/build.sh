@@ -4,17 +4,17 @@ meson builddir/ \
   -Dbuildtype=release \
   -Dprefix=$PREFIX \
   -Dlibdir=lib \
-  -Dplatforms=x11 \
+  -Dplatforms=x11,drm \
   -Dosmesa=gallium \
   -Dosmesa-bits=8 \
-  -Dglx=xlib \
-  -Dllvm=true \
-  -Dshared-llvm=false \
-  -Dbuild-tests=true
+  -Dvulkan-drivers=[] \
+  -Dgallium-drivers=swrast \
+  -Ddri-drivers=[] \
+  -Dbuild-tests=true \
+  -Dllvm=false 
 
 ninja -C builddir/ -j ${CPU_COUNT}
 
 ninja -C builddir/ install
 
-# TODO move to tests section of meta.yaml
 meson test -C builddir/
