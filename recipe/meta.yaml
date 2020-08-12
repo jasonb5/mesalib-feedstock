@@ -47,6 +47,7 @@ requirements:
     - xorg-glproto
     - xorg-xf86vidmodeproto
     - xorg-libxdamage
+    - xorg-libxrandr               # [osx]
     - xorg-libxfixes
 
   run:
@@ -56,7 +57,7 @@ requirements:
     - xorg-xextproto
     - xorg-glproto
     - xorg-xf86vidmodeproto
-    - xorg-libxdamage
+    - xorg-libxdamage              # [linux]
     - xorg-libxfixes
 
   run_constrained:
@@ -86,10 +87,10 @@ test:
     - pkg-config --exists glesv1_cm
     - pkg-config --exists glesv2
     - pkg-config --exists osmesa
-    # Fail due to missing pkg xxf86vm, disable OpenGL?
-    # - pkg-config --exists gl
+    # Disable gl, egl for linux, issue with xxf86vm missing dependency, disbale OpenGL?
+    - pkg-config --exists gl        # [osx]
     # - pkg-config --exists egl
-    - pkg-config --exists gbm
+    - pkg-config --exists gbm       # [linux]
 
 about:
   home: http://www.mesa3d.org
